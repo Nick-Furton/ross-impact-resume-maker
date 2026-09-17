@@ -38,7 +38,7 @@ function refresh() {
   queued = true;
   setTimeout(() => {
     queued = false;
-    lastLayout = layoutResume(toLayoutData(state));
+    try { lastLayout = layoutResume(toLayoutData(state)); } catch (err) { console.error(err); return; }
     $("#pages").innerHTML = lastLayout.pages.map((items, i) => pageSvg(items, i, i === 0)).join("");
     const f = lastLayout.fit, badge = $("#fit");
     if (f.pages === 1) {
@@ -71,27 +71,37 @@ function sortable(listEl, onDone) {
     try { handle.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or lost pointer */ }
     item.classList.add("dragging");
     const scroller = $("#editor");
-    const move = (ev) => {
+    const recapture = () => { try { handle.setPointerCapture(e.pointerId); } catch (err) { /* fine */ } };
+    let lastY = e.clientY;
+    const place = () => {
       const sibs = [...listEl.children].filter((c) => c !== item);
-      const before = sibs.find((s) => { const r = s.getBoundingClientRect(); return ev.clientY < r.top + r.height / 2; });
-      if (before) { if (item.nextElementSibling !== before) listEl.insertBefore(item, before); }
-      else if (listEl.lastElementChild !== item) listEl.append(item);
-      const box = scroller.getBoundingClientRect();
-      if (ev.clientY < box.top + 50) scroller.scrollBy(0, -14);
-      else if (ev.clientY > box.bottom - 50) scroller.scrollBy(0, 14);
-      if (ev.clientY < 60) window.scrollBy(0, -14);
-      else if (ev.clientY > window.innerHeight - 60) window.scrollBy(0, 14);
+      const before = sibs.find((s) => { const r = s.getBoundingClientRect(); return lastY < r.top + r.height / 2; });
+      if (before) { if (item.nextElementSibling !== before) { listEl.insertBefore(item, before); recapture(); } }
+      else if (listEl.lastElementChild !== item) { listEl.append(item); recapture(); }
     };
-    const up = () => {
-      handle.removeEventListener("pointermove", move);
-      handle.removeEventListener("pointerup", up);
-      handle.removeEventListener("pointercancel", up);
+    const move = (ev) => { if (ev.pointerId !== e.pointerId) return; lastY = ev.clientY; place(); };
+    // Keep scrolling while the pointer rests near an edge, even if it stops moving.
+    const timer = setInterval(() => {
+      const box = scroller.getBoundingClientRect();
+      const paneScrolls = scroller.scrollHeight > scroller.clientHeight + 1;
+      const top = paneScrolls ? box.top : 0, bottom = paneScrolls ? box.bottom : window.innerHeight;
+      const dy = lastY < top + 60 ? -12 : lastY > bottom - 60 ? 12 : 0;
+      if (!dy) return;
+      if (paneScrolls) scroller.scrollBy(0, dy); else window.scrollBy(0, dy);
+      place();
+    }, 16);
+    const up = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      clearInterval(timer);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
       item.classList.remove("dragging");
       onDone([...listEl.children].map((c) => c.dataset.sortId));
     };
-    handle.addEventListener("pointermove", move);
-    handle.addEventListener("pointerup", up);
-    handle.addEventListener("pointercancel", up);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
   });
 }
 const reorder = (arr, ids) => { const byId = new Map(arr.map((x) => [x.id, x])); arr.splice(0, arr.length, ...ids.map((id) => byId.get(id)).filter(Boolean)); };
@@ -108,7 +118,7 @@ function field(label, obj, key, opts = {}) {
 }
 
 const grip = () => h("button", { class: "handle", type: "button", title: "Drag to reorder", "aria-label": "Drag to reorder" }, "☰");
-const autoGrow = (ta) => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + 2 + "px"; };
+const autoGrow = (ta) => { if (!ta.offsetParent) return; ta.style.height = "auto"; ta.style.height = ta.scrollHeight + 2 + "px"; };
 
 function bulletList(list) {
   const ul = h("div", { class: "bullets" });
@@ -185,6 +195,8 @@ function renderForm() {
     h("div", { class: "block" }, h("h2", {}, "Additional"), h("section", { class: "card" }, bulletList(state.additional))));
 }
 
+const growAll = () => document.querySelectorAll("#form textarea").forEach(autoGrow);
+
 // ---------- toolbar ----------
 function download(bytes, name, type) {
   const url = URL.createObjectURL(new Blob([bytes], { type }));
@@ -213,7 +225,8 @@ $("#file").addEventListener("change", async (e) => {
 });
 $("#btn-blank").addEventListener("click", () => { if (confirm("Clear everything and start from a blank resume?")) { state = blankState(); renderForm(); refresh(); } });
 $("#btn-sample").addEventListener("click", () => { if (confirm("Replace your current resume with the sample?")) { state = normalize(SAMPLE_STATE); renderForm(); refresh(); } });
-for (const tab of document.querySelectorAll("[data-view]")) tab.addEventListener("click", () => { document.body.dataset.view = tab.dataset.view; });
+for (const tab of document.querySelectorAll("[data-view]")) tab.addEventListener("click", () => { document.body.dataset.view = tab.dataset.view; growAll(); });
+window.addEventListener("resize", growAll);
 
 renderForm();
 refresh();

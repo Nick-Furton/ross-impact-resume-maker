@@ -37,6 +37,7 @@ Then open http://localhost:8000.
 ```bash
 node test/run.mjs        # layout engine vs. ground truth (needs a private fixture, skips without it)
 node test/make_pdf.mjs   # renders the sample resume to test/private/out.pdf
+node test/drag_cdp.mjs   # real mouse-drag reorder test in headless Chrome (serve on port 8765 first)
 python test/gen_metrics.py   # regenerates js/metrics.js from the fonts
 ```
 

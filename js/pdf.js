@@ -2,6 +2,9 @@
 // Works in Node too (test/make_pdf.mjs) when given the libraries and font bytes.
 import { G, contactRuns, textWidth } from "./layout.js";
 
+// pdf-lib writes PDFString contents verbatim, so parentheses and backslashes must never reach it.
+const safeUri = (u) => encodeURI(u).replace(/[()]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase()).split("\\").join("%5C");
+
 let fontBytes = null;
 async function loadFonts() {
   if (!fontBytes) {
@@ -45,7 +48,7 @@ export async function buildPdf(layout, title, deps = {}) {
             annots.push(doc.context.register(doc.context.obj({
               Type: "Annot", Subtype: "Link", Border: [0, 0, 0],
               Rect: [r.x, G.PAGE_H - it.y - 3, r.x + r.w, G.PAGE_H - it.y + 9],
-              A: { Type: "Action", S: "URI", URI: PDFString.of(r.link) },
+              A: { Type: "Action", S: "URI", URI: PDFString.of(safeUri(r.link)) },
             })));
           }
         }

@@ -196,10 +196,11 @@ export function layoutResume(data) {
   for (const it of items) { if (!groups.has(it.group)) groups.set(it.group, []); groups.get(it.group).push(it); }
   for (const [, its] of groups) {
     const rightKinds = its.filter((it) => it.kind !== "left");
+    if (!rightKinds.length) { for (const it of its) pages[pages.length - 1].push({ ...it, y: it.y - offset }); continue; }
     const bottom = Math.max(...rightKinds.map((it) => it.y));
     const tall = bottom - Math.min(...rightKinds.map((it) => it.y)) > G.SAFE_LAST_BASELINE - G.PAGE2_FIRST;
     if (bottom - offset > G.SAFE_LAST_BASELINE && pages[pages.length - 1].length && !tall) {
-      const first = its.find((it) => it.kind === "org" || it.kind === "dot" || it.kind === "body");
+      const first = rightKinds[0];
       const firstBase = first.size === 12 ? first.y - G.LABEL_DROP : first.y;
       offset = firstBase - G.PAGE2_FIRST;
       pages.push([]);

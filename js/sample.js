@@ -1,7 +1,7 @@
 // A fictional sample resume. Layout-engine format (see toLayoutData in app.js for the editor format).
 export const SAMPLE_STATE = {
   name: "Taylor Morgan",
-  email: "tmorgan@umich.edu",
+  email: "taylor.morgan@example.com",
   phone: "(734) 555-0142",
   linkedin: "linkedin.com/in/taylor-morgan-example",
   education: [
