@@ -6,6 +6,7 @@ import { setCustomFonts } from "./pdf.js";
 const WANT = ["Calibri", "Calibri-Bold"];       // PostScript names: regular, bold
 const FACE = "ResumeCalibri";
 let faces = [];
+let pending = [null, null];   // lets a visitor pick the two files one at a time
 
 const bytesOf = async (blob) => new Uint8Array(await blob.arrayBuffer());
 function psName(bytes) {
@@ -22,7 +23,7 @@ function db() {
 }
 async function idb(mode, fn) {
   const d = await db();
-  return new Promise((res, rej) => { const tx = d.transaction("f", mode); const out = fn(tx.objectStore("f")); tx.oncomplete = () => res(out.result); tx.onerror = () => rej(tx.error); });
+  return new Promise((res, rej) => { const tx = d.transaction("f", mode); const out = fn(tx.objectStore("f")); tx.oncomplete = () => res(out.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); });
 }
 
 async function apply(pair, persist) {
@@ -46,9 +47,11 @@ export async function useSystemCalibri() {
 
 // Any browser: the visitor picks calibri.ttf and calibrib.ttf themselves.
 export async function useCalibriFiles(fileList) {
-  const pair = [null, null];
-  for (const file of fileList) { const b = await bytesOf(file); const i = WANT.indexOf(psName(b)); if (i >= 0) pair[i] = b; }
-  if (!pair[0] || !pair[1]) throw new Error("Pick both files: Calibri Regular (calibri.ttf) and Calibri Bold (calibrib.ttf).");
+  for (const file of fileList) { const b = await bytesOf(file); const i = WANT.indexOf(psName(b)); if (i >= 0) pending[i] = b; }
+  if (!pending[0] && !pending[1]) throw new Error("Pick both files: Calibri Regular (calibri.ttf) and Calibri Bold (calibrib.ttf). Hold Ctrl or Cmd to select both at once.");
+  if (!pending[1]) throw new Error("Got Calibri Regular. Now pick Calibri Bold (calibrib.ttf).");
+  if (!pending[0]) throw new Error("Got Calibri Bold. Now pick Calibri Regular (calibri.ttf).");
+  const pair = pending; pending = [null, null];
   await apply(pair, true);
 }
 
@@ -62,6 +65,7 @@ export async function restoreCalibri() {
 
 export async function dropCalibri() {
   faces.forEach((f) => document.fonts.delete(f)); faces = [];
+  pending = [null, null];
   setCustomFonts(null);
   try { await idb("readwrite", (s) => s.delete("calibri")); } catch (e) { /* ignore */ }
 }
