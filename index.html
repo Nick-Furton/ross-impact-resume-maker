@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ross Impact Resume Maker | Open-sourced by Nick Furton</title>
+  <meta name="description" content="Free, open-source resume maker that reproduces the Ross-style one-page resume format. Runs entirely in your browser.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f3a5f'/%3E%3Cpath d='M9 9h14M9 14h14M9 19h9' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preload" href="fonts/Carlito-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="fonts/Carlito-Bold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-view="edit">
+  <header class="top">
+    <div class="brand">
+      <h1>Ross Impact Resume Maker</h1>
+      <p>Open-sourced by Nick Furton</p>
+    </div>
+    <nav class="tools">
+      <button id="btn-sample" type="button" class="ghost">Load sample</button>
+      <button id="btn-blank" type="button" class="ghost">Start blank</button>
+      <button id="btn-open" type="button" class="ghost">Open file</button>
+      <button id="btn-save" type="button" class="ghost">Save file</button>
+      <button id="btn-pdf" type="button" class="primary">Download PDF</button>
+      <input id="file" type="file" accept="application/json,.json" hidden>
+    </nav>
+  </header>
+
+  <p class="notice">Unofficial. Not affiliated with or endorsed by the University of Michigan or the Ross School of Business. Your resume stays in your browser and is never uploaded.</p>
+
+  <div class="tabs" role="tablist">
+    <button type="button" data-view="edit">Edit</button>
+    <button type="button" data-view="preview">Preview</button>
+  </div>
+
+  <main class="panes">
+    <div id="editor" class="pane editor">
+      <form id="form" onsubmit="return false"></form>
+      <footer class="foot">
+        <p>The page layout matches the Ross resume builder: same margins, type sizes, line width, and spacing, measured from real output. The font is Carlito, an open font with the same letter widths as Calibri.</p>
+        <p><a href="https://github.com/Nick-Furton/ross-impact-resume-maker" rel="noopener">Source code on GitHub</a> · MIT license</p>
+      </footer>
+    </div>
+    <div class="pane preview">
+      <div id="fit" class="fit" aria-live="polite"></div>
+      <div id="pages"></div>
+    </div>
+  </main>
+
+  <script src="vendor/pdf-lib.min.js" defer></script>
+  <script src="vendor/fontkit.umd.min.js" defer></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
