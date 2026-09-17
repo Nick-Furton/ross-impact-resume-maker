@@ -38,12 +38,14 @@
     <div id="editor" class="pane editor">
       <form id="form" onsubmit="return false"></form>
       <footer class="foot">
-        <p>The page layout matches the Ross resume builder: same margins, type sizes, line width, and spacing, measured from real output. The font is Carlito, an open font with the same letter widths as Calibri.</p>
+        <p>The page layout matches the Ross resume builder: same margins, type sizes, line width, and spacing, measured from real output. The built-in font is Carlito, an open font with the same letter widths as Calibri, so line breaks never change. Calibri itself cannot be hosted on a website, but the app can use the Calibri already installed on your computer and embed it in your PDF.</p>
         <p><a href="https://github.com/Nick-Furton/ross-impact-resume-maker" rel="noopener">Source code on GitHub</a> · MIT license</p>
       </footer>
     </div>
     <div class="pane preview">
       <div id="fit" class="fit" aria-live="polite"></div>
+      <div id="fontbar" class="fontbar"></div>
+      <input id="fontfiles" type="file" accept=".ttf,.otf,font/ttf" multiple hidden>
       <div id="pages"></div>
     </div>
   </main>

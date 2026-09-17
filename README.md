@@ -20,7 +20,11 @@ A free resume maker that reproduces the one-page Ross-style resume format: same 
 
 The page geometry was measured from real output of the original builder: Letter page, 0.7 in side margins, Calibri 15/12/11 pt, a 423.36 pt bullet line, 11.33 pt line pitch, and fixed gaps between bullets, entries, and sections. The wrap is greedy and also breaks after hyphens. The model reproduced 13 real resumes line for line, with every baseline within 0.002 pt.
 
-Calibri cannot be redistributed, so the app uses [Carlito](https://github.com/googlefonts/carlito) (SIL Open Font License), which has the same letter widths. Line breaks are therefore identical. Letter shapes differ very slightly.
+### Fonts
+
+Calibri's license does not allow hosting the font file on a website or in a repository, whether or not anything is sold. So the app ships [Carlito](https://github.com/googlefonts/carlito) (SIL Open Font License), which has the same letter widths, and line breaks are identical either way.
+
+To get real Calibri in your PDF, click **Use my Calibri**. In Chrome or Edge on a computer the browser asks permission and reads the Calibri that came with Windows or Office. In any other browser, choose `calibri.ttf` and `calibrib.ttf` from your own computer. The font never leaves your machine: it is embedded in your own PDF, which the license allows, and remembered in your browser for next time. The first lookup can take up to a minute while the browser indexes your fonts.
 
 ## Run it locally
 
@@ -37,6 +41,7 @@ Then open http://localhost:8000.
 ```bash
 node test/run.mjs        # layout engine vs. ground truth (needs a private fixture, skips without it)
 node test/make_pdf.mjs   # renders the sample resume to test/private/out.pdf
+node test/font_cdp.mjs   # use-my-Calibri paths in headless Chrome on Windows (serve on port 8765 first)
 node test/drag_cdp.mjs   # real mouse-drag reorder test in headless Chrome (serve on port 8765 first)
 python test/gen_metrics.py   # regenerates js/metrics.js from the fonts
 ```

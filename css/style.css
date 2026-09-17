@@ -64,8 +64,11 @@ textarea { resize: none; overflow: hidden; line-height: 1.4; min-height: 52px; }
 
 .fit { position: sticky; top: 0; z-index: 2; margin: 0 auto 12px; max-width: 760px; padding: 7px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 600; background: #fff; border: 1px solid var(--line); }
 .fit.ok { color: var(--ok); } .fit.over { color: var(--bad); border-color: #f0c4bf; }
+.fontbar { max-width: 760px; margin: -4px auto 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.fontbar button { padding: 3px 9px; font-size: 12px; }
+.fontbar .err { color: var(--bad); flex-basis: 100%; }
 #pages { max-width: 760px; margin: 0 auto; }
-svg.page { display: block; width: 100%; height: auto; margin-bottom: 16px; background: #fff; border: 1px solid #d5d9e0; box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08); font-family: "Carlito", Calibri, Arial, sans-serif; font-kerning: none; font-variant-ligatures: none; }
+svg.page { display: block; width: 100%; height: auto; margin-bottom: 16px; background: #fff; border: 1px solid #d5d9e0; box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08); font-family: "ResumeCalibri", "Carlito", Arial, sans-serif; font-kerning: none; font-variant-ligatures: none; }
 
 .foot { margin-top: 26px; font-size: 12px; color: var(--muted); }
 .foot a { color: var(--accent); }

@@ -1,6 +1,7 @@
 import { layoutResume, LABELS } from "./layout.js";
 import { pageSvg } from "./preview.js";
-import { buildPdf } from "./pdf.js";
+import { buildPdf, usingCalibri } from "./pdf.js";
+import { canReadSystemFonts, useSystemCalibri, useCalibriFiles, restoreCalibri, dropCalibri } from "./fonts.js";
 import { normalize, blankState, toFile, toLayoutData, uid } from "./model.js";
 import { SAMPLE_STATE } from "./sample.js";
 
@@ -228,6 +229,28 @@ $("#btn-sample").addEventListener("click", () => { if (confirm("Replace your cur
 for (const tab of document.querySelectorAll("[data-view]")) tab.addEventListener("click", () => { document.body.dataset.view = tab.dataset.view; growAll(); });
 window.addEventListener("resize", growAll);
 
+// ---------- font choice ----------
+function renderFontBar(error, busy) {
+  const bar = $("#fontbar");
+  const kids = [];
+  if (busy) {
+    kids.push(h("span", {}, "Looking for Calibri on this computer… the first time can take up to a minute."));
+  } else if (usingCalibri()) {
+    kids.push(h("span", {}, "Font: Calibri, from this computer."),
+      h("button", { type: "button", onclick: async () => { await dropCalibri(); renderFontBar(); refresh(); } }, "Switch back to Carlito"));
+  } else {
+    kids.push(h("span", {}, "Font: Carlito (same widths as Calibri)."));
+    const run = async (fn) => { renderFontBar(null, true); try { await fn(); renderFontBar(); refresh(); } catch (err) { renderFontBar(err.message || String(err)); } };
+    if (canReadSystemFonts()) kids.push(h("button", { type: "button", title: "Your browser will ask for permission to read your installed fonts. The font stays on your computer.", onclick: () => run(useSystemCalibri) }, "Use my Calibri"));
+    kids.push(h("button", { type: "button", title: "Pick calibri.ttf and calibrib.ttf from your computer (on Windows they are in the Fonts folder inside the Windows folder)", onclick: () => $("#fontfiles").click() }, canReadSystemFonts() ? "Choose font files" : "Use my Calibri files"));
+    $("#fontfiles").onchange = (e) => { const files = [...e.target.files]; e.target.value = ""; if (files.length) run(() => useCalibriFiles(files)); };
+  }
+  if (error) kids.push(h("span", { class: "err" }, error));
+  bar.replaceChildren(...kids);
+}
+
 renderForm();
 refresh();
+renderFontBar();
+restoreCalibri().then((ok) => { if (ok) { renderFontBar(); refresh(); } });
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);

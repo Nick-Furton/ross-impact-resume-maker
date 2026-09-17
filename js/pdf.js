@@ -6,7 +6,11 @@ import { G, contactRuns, textWidth } from "./layout.js";
 const safeUri = (u) => encodeURI(u).replace(/[()]/g, (c) => "%" + c.charCodeAt(0).toString(16).toUpperCase()).split("\\").join("%5C");
 
 let fontBytes = null;
+let customFonts = null;   // [regular, bold] bytes of the visitor's own Calibri, when they chose to use it
+export function setCustomFonts(pair) { customFonts = pair; }
+export const usingCalibri = () => !!customFonts;
 async function loadFonts() {
+  if (customFonts) return customFonts;
   if (!fontBytes) {
     const get = async (u) => new Uint8Array(await (await fetch(u)).arrayBuffer());
     fontBytes = await Promise.all([get("fonts/Carlito-Regular.ttf"), get("fonts/Carlito-Bold.ttf")]);
